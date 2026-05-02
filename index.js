@@ -286,6 +286,7 @@ client.on('interactionCreate', async interaction => {
 
 const app = express();
 app.use(express.json());
+
 app.post('/login', (req, res) => {
     const { username, password, hwid } = req.body;
     const acc = db.prepare('SELECT * FROM accounts WHERE username=? COLLATE NOCASE').get(username);
@@ -298,6 +299,12 @@ app.post('/login', (req, res) => {
     db.prepare('UPDATE accounts SET launch_count=launch_count+1 WHERE username=?').run(username);
     res.json({ success: true, reason: 'Login successful' });
 });
+
+// ✅ Health check endpoint for cron-job.org (keeps bot awake 24/7)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 app.listen(3002, () => console.log('⚡ Beta API on 3002'));
 
 client.login(process.env.DISCORD_TOKEN);
